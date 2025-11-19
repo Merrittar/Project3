@@ -30,7 +30,12 @@ For this project, you will read, assemble, format, and analyze a dataset of Dr. 
 ### Packages Used
 
 ```{r packages}
-
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(stringr)
+library(skimr)
 ```
 
 ### Build the Student Dataset
@@ -40,7 +45,8 @@ For this project, you will read, assemble, format, and analyze a dataset of Dr. 
 Use the `excel_sheets()` function to discover the names of the sheets in the workbook.
 
 ```{r}
-
+file <- "DataScienceRosters.xlsx"
+excel_sheets(file)
 ```
 
 #### Read the Excel Worksheets into `R`
@@ -48,7 +54,23 @@ Use the `excel_sheets()` function to discover the names of the sheets in the wor
 Read each Excel sheet into its own dataset. The files use "N/A" to represent missing data, primarily email addresses for graduated students. Set the `na =` parameter in the `read_xlsx()` function to recognize this value so that `R` will convert them to `NA`. For the sheets containing student data, add a variable the indicates the semester the students were enrolled in the course (e.g., "Spring 2018" for all students in the Spring 2018 roster). 
 
 ```{r}
+file <- "DataScienceRosters.xlsx"
 
+sheets <- excel_sheets(file)
+
+roster_sheets <- sheets[! sheets %in% c("Colleges", "CourseInfo")]
+
+roster_sheets
+
+rosters_list <- lapply(roster_sheets, function(sheet) {
+  read_xlsx(
+    file,
+    sheet = sheet,
+    na = "N/A"
+  ) %>%
+    clean_names() %>%   
+    mutate(semester = sheet)
+})
 ```
 
 #### Bind All Student Datasets Together
@@ -56,13 +78,14 @@ Read each Excel sheet into its own dataset. The files use "N/A" to represent mis
 Bind all of the individual semester datasets into a single master data file of students.
 
 ```{r}
-
+students <- bind_rows(rosters_list)
+students
 ```
 
 Use `glimpse()` to explore the structure of your combined dataset.
 
 ```{r}
-
+glimpse(students)
 ```
 
 #### Do Additional Data Manipulations
@@ -83,13 +106,70 @@ Perform these additional manipulations on the student dataset. Try to be as effi
 * Arrange (order) the dataset by student last name.
 
 ```{r}
+students_step1 <- students %>% 
+  clean_names()
 
+students_step2 <- students_step1 %>%
+  separate(student_name,
+           into = c("last_name", "first_middle"),
+           sep = ", ",
+           remove = TRUE)
+
+students_step2 <- students_step2 %>%
+  separate(first_middle,
+           into = c("first_name", "middle_initial"),
+           sep = " ",
+           fill = "right")
+
+students_step3 <- students_step2 %>%
+  separate(major_conc,
+           into = c("major", "concentration"),
+           sep = ", ",
+           fill = "right")
+
+colleges_clean <- read_xlsx(file, sheet = "Colleges") %>%
+  clean_names()
+
+students_step4 <- students_step3 %>%
+  left_join(colleges_clean, 
+            by = c("college" = "college_short"))
+
+students_step5 <- students_step4 %>%
+  relocate(college_full, .after = college)
+
+students_step6 <- students_step5 %>%
+  filter(class != "Non Degree Undergraduate")
+
+students_step7 <- students_step6 %>%
+  mutate(class = factor(class,
+                        levels = c("Freshman", "Sophomore", "Junior", "Senior")))
+
+students_step8 <- students_step7 %>%
+  mutate(semester = factor(semester,
+                           levels = unique(semester)))
+
+students_step9 <- students_step8 %>%
+  mutate(math_indicator = if_else(major == "Mathematics",
+                                  "Math",
+                                  "Not Math"))
+
+students_step10 <- students_step9 %>%
+  relocate(math_indicator, .after = concentration)
+
+course_table <- read_xlsx(file, sheet = "CourseName") %>% 
+  clean_names()
+
+students_step11 <- students_step10 %>% 
+  left_join(course_table, by = "semester")
+
+students_step12 <- students_step11 %>%
+  arrange(last_name, first_name)
 ```
 
 Use `skim()` to explore the structure of your new dataset.
 
 ```{r}
-
+skim(students_step12)
 ```
 
 #### Now Save Your Formatted Dataset !
@@ -97,7 +177,7 @@ Use `skim()` to explore the structure of your new dataset.
 Save your dataset in `.rds` format. (*You will submit this with your HTML file.*)
 
 ```{r}
-
+saveRDS(students_step12, file = "students_clean.rds")
 ```
 
 ### Explore the Student Dataset
