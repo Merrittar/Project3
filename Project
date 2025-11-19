@@ -207,7 +207,12 @@ Use the `distinct()` function to create a list of all the different majors who h
 Create a count of the number of students in each major that have taken the course. Arrange it in order from the most to the least students and print the top ten majors.
 
 ```{r}
+count(students_12) %>%
+group_by(major) 
 
+top_10_majors <- arrange(desc(major))
+
+top_10_majors
 ```
 
 #### Mathematics vs. Not Math Majors
@@ -215,6 +220,7 @@ Create a count of the number of students in each major that have taken the cours
 Create a bar plot to show the proportion or percentage of mathematics versus other (*not math*) majors. Include appropriate labels and other formatting of your choice to to help clarify the information conveyed by your plot.
 
 ```{r}
+
 
 ```
 
