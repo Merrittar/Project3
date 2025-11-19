@@ -154,7 +154,7 @@ students_step9 <- students_step8 %>%
                                   "Not Math"))
 
 students_step10 <- students_step9 %>%
-  relocate(math_indicator, .after = concentration)
+  relocate(math_indicator, .after = concentration) %>% select(-course_name)
 
 course_table <- read_xlsx(file, sheet = "CourseName") %>% 
   clean_names()
