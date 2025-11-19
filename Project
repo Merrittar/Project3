@@ -187,13 +187,15 @@ saveRDS(students_step12, file = "students_clean.rds")
 Create a count of the number of students enrolled in the course each semester. Save this as an object to use in the next question. Be sure to display the results.
 
 ```{r}
-
+counted_enrollment = students_step12 %>% group_by(semester, course_name) %>% count()
+counted_enrollment
 ```
 
 Using the count information you found above, summarize the average number of students in the class, as well as the minimum and maximum class sizes.
 
 ```{r}
-
+counted_enrollment %>%
+  summarise(minimum = min(counted_enrollment$n), maximum = max(counted_enrollment$n), average = sum(counted_enrollment$n) / nrow(counted_enrollment))
 ```
 
 #### Majors of Students in the Course 
@@ -201,7 +203,10 @@ Using the count information you found above, summarize the average number of stu
 Use the `distinct()` function to create a list of all the different majors who have enrolled in the course. Arrange it in alphabetical order and `print()` the result.
 
 ```{r}
-
+major_course_combinations = students_step12 %>%
+  distinct(major, course_name) %>%
+  arrange(major, course_name)
+print(major_course_combinations)
 ```
 
 Create a count of the number of students in each major that have taken the course. Arrange it in order from the most to the least students and print the top ten majors.
