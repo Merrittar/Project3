@@ -243,7 +243,13 @@ Create a bar plot to show the number of mathematics versus other (*not math*) ma
 Create a bar plot with the main bars representing semesters, using mathematics versus other (*not math*) majors as the fill variable. Use the `position =` parameter to make a proportional (or percent) stacked bar plot. This will show the proportion of mathematics versus other (*not math*) majors within each semester. Include appropriate labels and other formatting of your choice to help clarify the information conveyed by your plot.
 
 ```{r}
-
+ggplot(students_step12, aes(x = semester, fill = major_type)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c("math" = "blue", "not math" = "orange"), name = "Major Type") +
+  labs(title = "Proportion of Math vs. Non-Math Majors by Semester", x = "Semester", y = "Proportion of Students") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 #### Concentrations of Mathematics Majors
@@ -251,7 +257,16 @@ Create a bar plot with the main bars representing semesters, using mathematics v
 Filter the dataset to include only mathematics majors. Make a [tree map](https://r-charts.com/part-whole/treemapify/) of their concentrations. Make the version that labels each square with the concentration name and the number of students. The best way to get the values (`n`) and groups (`concentration`) you need is to `count()` the concentrations and save the output as your dataset to use for the plot.
 
 ```{r}
+math_conc_counts <- students_step12 %>%
+  filter(major_type == "math") %>%
+  count(concentration)
 
+
+ggplot(math_conc_counts, aes(area = n, fill = concentration, label = paste(concentration, "\n", n))) +
+  geom_treemap() +
+  geom_treemap_text(colour = "white", place = "centre", grow = TRUE) +
+  labs(title = "Mathematics Majors by Concentration", fill = "Concentration") +
+  theme_minimal()
 ```
 
 #### Plot of Choice for Student Class Years
@@ -259,7 +274,14 @@ Filter the dataset to include only mathematics majors. Make a [tree map](https:/
 Make a plot of your choice to investigate the distribution of class years for students in the course.
 
 ```{r}
+class_counts <- students_step12 %>% count(class_year)
 
+ggplot(class_counts, aes(x = "", y = n, fill = class_year)) +
+  geom_col(width = 1) +
+  coord_polar("y") +
+  labs(title = "Proportion of Class Years in the Course", fill = "Class Year") +
+  theme_minimal() +
+  theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank())
 ```
 
 ### Summarize Your Findings
