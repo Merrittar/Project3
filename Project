@@ -259,7 +259,32 @@ ggplot(students_step10, aes( x = math_indicator, fill = students_step10)) +
 Create a bar plot to show the number of mathematics versus other (*not math*) majors. Facet by course name. Include appropriate labels and other formatting of your choice to to help clarify the information conveyed by your plot.
 
 ```{r}
+library(ggplot2)
+library(readxl)
+library(dplyr)
 
+file <- "DataScienceRosters.xlsx"
+
+sheets <- excel_sheets(file)
+
+students_step9 <- students_step8 %>%
+  mutate(math_indicator = if_else(major == "Mathematics",
+                                  "Math",
+                                  "Not Math"))
+course_table <- read_xlsx(file, sheet = "CourseName")
+
+students_step10 <- students_step9 %>%
+  relocate(math_indicator, .after = concentration) %>% select(-course_name)
+
+
+
+  
+ggplot(students_step12, aes(x = course_name, fill = math_indicator)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Math Ratio by Course", x = "Semester", y = "Proportion of Students", fill = "Math vs. Non-Math Majors") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 50, hjust = 1))
 ```
 
 
@@ -268,11 +293,28 @@ Create a bar plot to show the number of mathematics versus other (*not math*) ma
 Create a bar plot with the main bars representing semesters, using mathematics versus other (*not math*) majors as the fill variable. Use the `position =` parameter to make a proportional (or percent) stacked bar plot. This will show the proportion of mathematics versus other (*not math*) majors within each semester. Include appropriate labels and other formatting of your choice to help clarify the information conveyed by your plot.
 
 ```{r}
-ggplot(students_step12, aes(x = semester, fill = major_type)) +
+
+library(ggplot2)
+library(readxl)
+library(dplyr)
+
+file <- "DataScienceRosters.xlsx"
+
+sheets <- excel_sheets(file)
+
+students_step9 <- students_step8 %>%
+  mutate(math_indicator = if_else(major == "Mathematics",
+                                  "Math",
+                                  "Not Math"))
+course_table <- read_xlsx(file, sheet = "CourseName")
+
+students_step10 <- students_step9 %>%
+  relocate(math_indicator, .after = concentration) %>% select(-course_name)
+
+ggplot(students_step12, aes(x = semester, fill = major)) +
   geom_bar(position = "fill") +
   scale_y_continuous(labels = scales::percent) +
-  scale_fill_manual(values = c("math" = "blue", "not math" = "orange"), name = "Major Type") +
-  labs(title = "Proportion of Math vs. Non-Math Majors by Semester", x = "Semester", y = "Proportion of Students") +
+  labs(title = "Majors by Semester", x = "Semester", y = "Proportion of Students") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
@@ -299,9 +341,19 @@ ggplot(math_conc_counts, aes(area = n, fill = concentration, label = paste(conce
 Make a plot of your choice to investigate the distribution of class years for students in the course.
 
 ```{r}
-class_counts <- students_step12 %>% count(class_year)
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(stringr)
+library(skimr)
+library(janitor)
+library(treemap)
+library(treemapify)
+class_counts <- students_step12 %>% count(semester) %>%
 
-ggplot(class_counts, aes(x = "", y = n, fill = class_year)) +
+
+ggplot(class_counts, aes(x = "", y = n, fill = semester)) +
   geom_col(width = 1) +
   coord_polar("y") +
   labs(title = "Proportion of Class Years in the Course", fill = "Class Year") +
