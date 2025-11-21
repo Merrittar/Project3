@@ -226,7 +226,31 @@ top_majors
 Create a bar plot to show the proportion or percentage of mathematics versus other (*not math*) majors. Include appropriate labels and other formatting of your choice to to help clarify the information conveyed by your plot.
 
 ```{r}
+library(ggplot2)
+library(readxl)
+library(dplyr)
 
+file <- "DataScienceRosters.xlsx"
+
+sheets <- excel_sheets(file)
+
+students_step9 <- students_step8 %>%
+  mutate(math_indicator = if_else(major == "Mathematics",
+                                  "Math",
+                                  "Not Math"))
+
+students_step10 <- students_step9 %>%
+  relocate(math_indicator, .after = concentration) %>% select(-course_name)
+
+course_table <- read_xlsx(file, sheet = "CourseName") %>% 
+  clean_names()
+
+
+  
+ggplot(students_step10, aes( x = math_indicator, fill = students_step10)) +
+  geom_bar(fill = 'lightblue') +
+  labs(title = "Math vs. Non-Math Majors", x = "Proportion of students", y = "  ") +
+  theme_minimal()
 
 ```
 
