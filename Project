@@ -30,6 +30,7 @@ For this project, you will read, assemble, format, and analyze a dataset of Dr. 
 ### Packages Used
 
 ```{r packages}
+library(janitor)
 library(readxl)
 library(dplyr)
 library(tidyr)
@@ -203,7 +204,7 @@ counted_enrollment %>%
 Use the `distinct()` function to create a list of all the different majors who have enrolled in the course. Arrange it in alphabetical order and `print()` the result.
 
 ```{r}
-major_course_combinations = students_step12 %>%
+major_course_combinations <- students_step12 %>%
   distinct(major, course_name) %>%
   arrange(major, course_name)
 print(major_course_combinations)
@@ -212,12 +213,12 @@ print(major_course_combinations)
 Create a count of the number of students in each major that have taken the course. Arrange it in order from the most to the least students and print the top ten majors.
 
 ```{r}
-count(students_12) %>%
-group_by(major) 
+top_majors <- major_course_combinations %>%
+  count(major) %>%
+  arrange(desc(n)) %>%
+  slice(1:10)
 
-top_10_majors <- arrange(desc(major))
-
-top_10_majors
+top_majors
 ```
 
 #### Mathematics vs. Not Math Majors
